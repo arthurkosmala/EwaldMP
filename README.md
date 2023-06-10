@@ -24,7 +24,7 @@ This repository was forked from the [Open Catalyst 2020 (OC20) Project](https://
 
 To setup a `conda` environment with the required dependencies, please follow the [OCP installation instructions](https://github.com/Open-Catalyst-Project/ocp/blob/main/INSTALL.md). They should work identically in this repository. We further recommend installing the `jupyter` package to access our example training and evaluation notebooks, as well as the `seml` package [[`github`](https://github.com/TUM-DAML/seml)] to run and manage (especially longer) experiments from the CLI. To reproduce the long-range binning analyses from the Ewald message passing paper, please install the `simple-dftd3` package [[`installation instructions`](https://dftd3.readthedocs.io/en/latest/installation.html)] including the Python API.
 
-## Data Download and Preprocessing
+## Data download and preprocessing
 
 Dataset download links and instructions for __OC20__ are in [DATASET.md](https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md) in the original OC20 repository.
 
