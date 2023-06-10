@@ -1,0 +1,142 @@
+seml:
+  executable: experiment_oc20.py
+  name: gemnet_oc20_baseline
+  output_dir: logs_oc20
+  project_root_dir: ..
+
+slurm:
+  experiments_per_job: 1
+  max_simultaneous_jobs: 4  # Restrict number of simultaneously running jobs per job array
+  sbatch_options:
+    mem: 16G          # memory
+    cpus-per-task: 4  # num cores
+    time: 14-00:00    # max time, D-HH:MM
+    partition: gpu_large
+    gres: 'gpu:1'
+    exclude: gpu15,gpu17,gpu20,mdsi-gpu01,mdsi-gpu02
+
+###### BEGIN PARAMETER CONFIGURATION ######
+
+fixed:
+  name: gemnet_oc20_baseline
+  dataset_train:
+    - src: /nfs/shared/datasets/oc20/s2ef/2M/train/
+      normalize_labels: True
+      target_mean: -0.7554450631141663
+      target_std: 2.887317180633545
+      grad_target_mean: 0.0
+      grad_target_std: 2.887317180633545
+    - src: /nfs/shared/datasets/oc20/s2ef/all/
+      subsampling_fraction: 0.01
+
+  dataset_id:
+    - src: /nfs/shared/datasets/oc20/s2ef/2M/train/
+      normalize_labels: True
+      target_mean: -0.7554450631141663
+      target_std: 2.887317180633545
+      grad_target_mean: 0.0
+      grad_target_std: 2.887317180633545
+    - src: /nfs/shared/datasets/oc20/s2ef/all/val_id/
+      subsampling_fraction: 0.03
+    - src: /nfs/homedirs/oc20_dataset/s2ef/all/test_id/
+
+  dataset_ood_ads:
+    - src: /nfs/shared/datasets/oc20/s2ef/2M/train/
+      normalize_labels: True
+      target_mean: -0.7554450631141663
+      target_std: 2.887317180633545
+      grad_target_mean: 0.0
+      grad_target_std: 2.887317180633545
+    - src: /nfs/shared/datasets/oc20/s2ef/all/val_ood_ads/
+      subsampling_fraction: 0.03
+    - src: /nfs/homedirs/oc20_dataset/s2ef/all/test_ood_ads/
+
+  dataset_ood_cat:
+    - src: /nfs/shared/datasets/oc20/s2ef/2M/train/
+      normalize_labels: True
+      target_mean: -0.7554450631141663
+      target_std: 2.887317180633545
+      grad_target_mean: 0.0
+      grad_target_std: 2.887317180633545
+    - src: /nfs/shared/datasets/oc20/s2ef/all/val_ood_cat/
+      subsampling_fraction: 0.03
+    - src: /nfs/homedirs/oc20_dataset/s2ef/all/test_ood_cat/
+
+  dataset_ood_both:
+    - src: /nfs/shared/datasets/oc20/s2ef/2M/train/
+      normalize_labels: True
+      target_mean: -0.7554450631141663
+      target_std: 2.887317180633545
+      grad_target_mean: 0.0
+      grad_target_std: 2.887317180633545
+    - src: /nfs/shared/datasets/oc20/s2ef/all/val_ood_both/
+      subsampling_fraction: 0.03
+    - src: /nfs/homedirs/oc20_dataset/s2ef/all/test_ood_both/
+
+  logger: None
+
+  task:
+    dataset: trajectory_lmdb
+    description: "Regressing to energies and forces for DFT trajectories from OCP"
+    type: regression
+    metric: mae
+    labels:
+      - potential energy
+    grad_input: atomic forces
+    train_on_free_atoms: True
+    eval_on_free_atoms: True
+
+  model:
+    name: gemnet_t
+    num_spherical: 7
+    num_radial: 128
+    num_blocks: 3
+    emb_size_atom: 256
+    emb_size_edge: 512
+    emb_size_trip: 64
+    emb_size_rbf: 16
+    emb_size_cbf: 16
+    emb_size_bil_trip: 64
+    num_before_skip: 1
+    num_after_skip: 2
+    num_concat: 1
+    num_atom: 3
+    cutoff: 6.0
+    max_neighbors: 50
+    rbf:
+      name: gaussian
+    envelope:
+      name: polynomial
+      exponent: 5
+    cbf:
+      name: spherical_harmonics
+    extensive: True
+    otf_graph: True
+    use_pbc: True
+    output_init: HeOrthogonal
+    activation: silu
+    scale_file: scaling_factors_oc20/gemnet_baseline.json
+
+    regress_forces: True
+    direct_forces: True
+
+  optimizer:
+    batch_size: 16
+    eval_batch_size: 16
+    eval_every: 20000
+    num_workers: 4
+    lr_initial: 5.e-4
+    optimizer: AdamW
+    optimizer_params: { "amsgrad": True }
+    scheduler: ReduceLROnPlateau
+    mode: min
+    factor: 0.8
+    patience: 3
+    max_steps: 3600000
+    max_epochs: 25
+    force_coefficient: 100
+    energy_coefficient: 1
+    ema_decay: 0.999
+    clip_grad_norm: 10
+    loss_energy: mae
+    loss_force: l2mae

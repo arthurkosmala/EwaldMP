@@ -1,0 +1,16 @@
+{
+    "comment": "",
+    "TripInteraction_1_had_rbf": 11.429593086242676,
+    "TripInteraction_1_sum_cbf": 7.793160915374756,
+    "AtomUpdate_1_sum": 1.7256001234054565,
+    "TripInteraction_2_had_rbf": 11.453593254089355,
+    "TripInteraction_2_sum_cbf": 7.956841945648193,
+    "AtomUpdate_2_sum": 1.6138941049575806,
+    "TripInteraction_3_had_rbf": 11.227234840393066,
+    "TripInteraction_3_sum_cbf": 8.245901107788086,
+    "AtomUpdate_3_sum": 1.6094084978103638,
+    "OutBlock_0_sum": 1.7665690183639526,
+    "OutBlock_1_sum": 1.5475775003433228,
+    "OutBlock_2_sum": 1.502061128616333,
+    "OutBlock_3_sum": 1.5154577493667603
+}

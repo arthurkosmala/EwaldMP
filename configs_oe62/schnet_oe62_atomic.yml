@@ -1,0 +1,78 @@
+seml:
+  executable: experiment_oe62.py
+  name: schnet_oe62_atomic
+  output_dir: logs_oe62
+  project_root_dir: ..
+
+slurm:
+# Put your own slurm settings here [example below]
+  experiments_per_job: 1
+  max_simultaneous_jobs: 4  # Restrict number of simultaneously running jobs per job array
+  sbatch_options:
+    mem: 16G          # memory
+    cpus-per-task: 4  # num cores
+    time: 8-00:00    # max time, D-HH:MM
+    partition: gpu_large
+    gres: 'gpu:1'
+
+fixed:
+  name: schnet_oe62_atomic
+
+  dataset:
+    - src: oe62/energy_linref_pbe0/train/pbe0_train.lmdb
+    #- src: oe62/energy_linref_pbe0_d3fit/train/pbe0_train.lmdb
+      normalize_labels: True
+      target_mean: 0.0036029791066818145 #for pbe0 linref energies
+      target_std: 1.7420150967007746 #for pbe0 linref energies
+      #target_mean: 0.0042125696386549494 #for pbe0 d3fit linref energies
+      #target_std: 1.7448031028122666 #for pbe0 d3fit linref energies
+    - src: oe62/energy_linref_pbe0/val/pbe0_val.lmdb
+    # For vdw-subtracted energies
+    #- src: oe62/energy_linref_pbe0_d3fit/val/pbe0_val.lmdb
+    - src: oe62/energy_linref_pbe0/test/pbe0_test.lmdb
+    # For vdw-subtracted energies
+    #- src: oe62/energy_linref_pbe0_d3fit/test/pbe0_test.lmdb
+
+
+  logger: tensorboard
+
+  task:
+    dataset: single_point_lmdb
+    description: "Regressing to DFT total energies for structures in OE62"
+    type: regression
+    metric: mae
+    labels:
+      - DFT total energy
+
+  model:
+    name: schnet
+    hidden_channels: 512
+    num_filters: 256
+    num_interactions: 4
+    num_gaussians: 200
+    cutoff: 6.0
+    max_neighbors: 50
+    atom_to_atom_cutoff: 12.0
+    use_pbc: False
+    otf_graph: True
+    regress_forces: False
+    readout: "add"
+
+  # *** Important note ***
+  #   The total number of gpus used for this run was 1.
+  #   If the global batch size (num_gpus * batch_size) is modified
+  #   the lr_milestones and warmup_steps need to be adjusted accordingly.
+
+  optimizer:
+    batch_size: 64
+    eval_batch_size: 128
+    num_workers: 4
+    lr_initial: 0.0005
+    lr_gamma: 0.1
+    lr_milestones: # steps at which lr_initial <- lr_initial * lr_gamma
+      - 60000
+      - 120000
+      - 180000
+    warmup_steps: 30000
+    warmup_factor: 0.2
+    max_epochs: 250

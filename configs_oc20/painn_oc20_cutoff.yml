@@ -1,0 +1,120 @@
+seml:
+  executable: experiment_oc20.py
+  name: painn_oc20_cutoff
+  output_dir: logs_oc20
+  project_root_dir: ..
+
+slurm:
+  experiments_per_job: 1
+  max_simultaneous_jobs: 4  # Restrict number of simultaneously running jobs per job array
+  sbatch_options:
+    mem: 16G          # memory
+    cpus-per-task: 4  # num cores
+    time: 14-00:00    # max time, D-HH:MM
+    partition: gpu_large
+    gres: 'gpu:1'
+    exclude: gpu[15,17,20]
+
+fixed:
+  name: painn_oc20_cutoff
+  dataset_train:
+    - src: /nfs/shared/datasets/oc20/s2ef/2M/train/
+      normalize_labels: True
+      target_mean: -0.7554450631141663
+      target_std: 2.887317180633545
+      grad_target_mean: 0.0
+      grad_target_std: 2.887317180633545
+    - src: /nfs/shared/datasets/oc20/s2ef/all/
+      subsampling_fraction: 0.01
+
+  dataset_id:
+    - src: /nfs/shared/datasets/oc20/s2ef/2M/train/
+      normalize_labels: True
+      target_mean: -0.7554450631141663
+      target_std: 2.887317180633545
+      grad_target_mean: 0.0
+      grad_target_std: 2.887317180633545
+    - src: /nfs/shared/datasets/oc20/s2ef/all/val_id/
+      subsampling_fraction: 0.03
+    #- src: /nfs/homedirs/oc20_dataset/s2ef/all/test_id/
+
+  dataset_ood_ads:
+    - src: /nfs/shared/datasets/oc20/s2ef/2M/train/
+      normalize_labels: True
+      target_mean: -0.7554450631141663
+      target_std: 2.887317180633545
+      grad_target_mean: 0.0
+      grad_target_std: 2.887317180633545
+    - src: /nfs/shared/datasets/oc20/s2ef/all/val_ood_ads/
+      subsampling_fraction: 0.03
+    #- src: /nfs/homedirs/oc20_dataset/s2ef/all/test_ood_ads/
+
+  dataset_ood_cat:
+    - src: /nfs/shared/datasets/oc20/s2ef/2M/train/
+      normalize_labels: True
+      target_mean: -0.7554450631141663
+      target_std: 2.887317180633545
+      grad_target_mean: 0.0
+      grad_target_std: 2.887317180633545
+    - src: /nfs/shared/datasets/oc20/s2ef/all/val_ood_cat/
+      subsampling_fraction: 0.03
+    #- src: /nfs/homedirs/oc20_dataset/s2ef/all/test_ood_cat/
+
+  dataset_ood_both:
+    - src: /nfs/shared/datasets/oc20/s2ef/2M/train/
+      normalize_labels: True
+      target_mean: -0.7554450631141663
+      target_std: 2.887317180633545
+      grad_target_mean: 0.0
+      grad_target_std: 2.887317180633545
+    - src: /nfs/shared/datasets/oc20/s2ef/all/val_ood_both/
+      subsampling_fraction: 0.03
+    #- src: /nfs/homedirs/oc20_dataset/s2ef/all/test_ood_both/
+
+  logger: tensorboard
+
+  task:
+    dataset: trajectory_lmdb
+    description: "Regressing to energies and forces for DFT trajectories from OCP"
+    type: regression
+    metric: mae
+    labels:
+      - potential energy
+    grad_input: atomic forces
+    train_on_free_atoms: True
+    eval_on_free_atoms: True
+
+  model:
+    name: painn
+    hidden_channels: 512
+    num_layers: 4
+    num_rbf: 128
+    cutoff: 7.0
+    max_neighbors: 80
+    scale_file: scaling_factors_oc20/painn_cutoff.pt
+    regress_forces: True
+    direct_forces: True
+    otf_graph: True
+    use_pbc: True
+
+  optimizer:
+    batch_size: 48
+    eval_batch_size: 48
+    eval_every: 10000
+    num_workers: 2
+    optimizer: AdamW
+    optimizer_params: {"amsgrad": True}
+    lr_initial: 1.e-4
+    lr_gamma: 0.8
+    scheduler: ReduceLROnPlateau
+    mode: min
+    factor: 0.8
+    patience: 3
+    max_epochs: 25
+    force_coefficient: 100
+    energy_coefficient: 1
+    ema_decay: 0.999
+    clip_grad_norm: 10
+    loss_energy: mae
+    loss_force: l2mae
+    weight_decay: 0  # 2e-6 (TF weight decay) / 1e-4 (lr) = 2e-2

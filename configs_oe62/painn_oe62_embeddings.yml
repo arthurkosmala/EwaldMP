@@ -1,0 +1,75 @@
+seml:
+  executable: experiment_oe62.py
+  name: painn_oe62_embeddings
+  output_dir: logs_oe62
+  project_root_dir: ..
+
+slurm:
+# Put your own slurm settings here [example below]
+  experiments_per_job: 1
+  max_simultaneous_jobs: 4  # Restrict number of simultaneously running jobs per job array
+  sbatch_options:
+    mem: 16G          # memory
+    cpus-per-task: 4  # num cores
+    time: 8-00:00    # max time, D-HH:MM
+    partition: gpu_large
+    gres: 'gpu:1'
+
+fixed:
+  name: painn_oe62_embeddings
+
+  dataset:
+    #- src: oe62/energy_linref_pbe0_d3fit/train/pbe0_train.lmdb
+    - src: oe62/energy_linref_pbe0/train/pbe0_train.lmdb
+      normalize_labels: True
+      target_mean: 0.0036029791066818145 #for pbe0 linref energies
+      target_std: 1.7420150967007746 #for pbe0 linref energies
+      #target_mean: 0.0042125696386549494 #for pbe0 d3fit linref energies
+      #target_std: 1.7448031028122666 #for pbe0 d3fit linref energies
+    - src: oe62/energy_linref_pbe0/val/pbe0_val.lmdb
+    # For vdw-subtracted energies
+    #- src: oe62/energy_linref_pbe0_d3fit/val/pbe0_val.lmdb
+    - src: oe62/energy_linref_pbe0/test/pbe0_test.lmdb
+    # For vdw-subtracted energies
+    #- src: oe62/energy_linref_pbe0_d3fit/test/pbe0_test.lmdb
+
+
+  logger: tensorboard
+
+  task:
+    dataset: single_point_lmdb
+    description: "Regressing to DFT total energies for structures in OE62"
+    type: regression
+    metric: mae
+    labels:
+      - DFT total energy
+
+  model:
+    name: painn
+    hidden_channels: 576
+    num_layers: 4
+    num_rbf: 128
+    cutoff: 6.0
+    max_neighbors: 50
+    scale_file: scaling_factors_oe62/painn_embeddings.pt
+    regress_forces: False
+    otf_graph: True
+    use_pbc: False
+
+  optimizer:
+    batch_size: 8
+    eval_batch_size: 32
+    num_workers: 2
+    optimizer: AdamW
+    optimizer_params: {"amsgrad": True}
+    lr_initial: 1.e-4
+    scheduler: ReduceLROnPlateau
+    mode: min
+    factor: 0.5
+    patience: 10
+    max_epochs: 200
+    energy_coefficient: 1
+    ema_decay: 0.999
+    clip_grad_norm: 10
+    loss_energy: mae
+    weight_decay: 0  # 2e-6 (TF weight decay) / 1e-4 (lr) = 2e-2

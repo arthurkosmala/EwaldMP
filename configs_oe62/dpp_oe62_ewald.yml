@@ -1,0 +1,84 @@
+seml:
+  executable: experiment_oe62.py
+  name: dpp_oe62_ewald
+  output_dir: logs_oe62
+  project_root_dir: ..
+
+slurm:
+# Put your own slurm settings here [example below]
+  experiments_per_job: 1
+  max_simultaneous_jobs: 4  # Restrict number of simultaneously running jobs per job array
+  sbatch_options:
+    mem: 16G          # memory
+    cpus-per-task: 4  # num cores
+    time: 8-00:00    # max time, D-HH:MM
+    partition: gpu_large
+    gres: 'gpu:1'
+
+fixed:
+  name: dpp_oe62_ewald
+
+  dataset:
+    - src: oe62/energy_linref_pbe0/train/pbe0_train.lmdb
+    #- src: oe62/energy_linref_pbe0_d3fit/train/pbe0_train.lmdb
+      normalize_labels: True
+      target_mean: 0.0036029791066818145 #for pbe0 linref energies
+      target_std: 1.7420150967007746 #for pbe0 linref energies
+      #target_mean: 0.0042125696386549494 #for pbe0 d3fit linref energies
+      #target_std: 1.7448031028122666 #for pbe0 d3fit linref energies
+    - src: oe62/energy_linref_pbe0/val/pbe0_val.lmdb
+    # For vdw-subtracted energies
+    #- src: oe62/energy_linref_pbe0_d3fit/val/pbe0_val.lmdb
+    - src: oe62/energy_linref_pbe0/test/pbe0_test.lmdb
+    # For vdw-subtracted energies
+    #- src: oe62/energy_linref_pbe0_d3fit/test/pbe0_test.lmdb
+
+  logger: tensorboard
+
+  task:
+    dataset: single_point_lmdb
+    description: "Regressing to DFT total energies for structures in OE62"
+    type: regression
+    metric: mae
+    labels:
+      - DFT total energy
+
+  model:
+    name: dimenetplusplus
+    hidden_channels: 256
+    out_emb_channels: 192
+    num_blocks: 3
+    cutoff: 6.0
+    max_neighbors: 50
+    num_radial: 6
+    num_spherical: 7
+    num_before_skip: 1
+    num_after_skip: 2
+    num_output_layers: 3
+    ######################################### Ewald message passing hyperparameters
+    ewald_hyperparams:
+      k_cutoff: 0.8                           # Frequency cutoff [Å^-1]
+      delta_k: 0.2                            # Voxel grid resolution [Å^-1]
+      num_k_rbf: 128                          # Gaussian radial basis size (Fourier filter)
+      downprojection_size: 8                  # Size of linear bottleneck layer
+      num_hidden: 3                           # Number of residuals in update function
+    #########################################
+    regress_forces: False
+    otf_graph: True
+    use_pbc: False
+
+  optimizer:
+    batch_size: 8
+    eval_batch_size: 32
+    eval_every: 10000
+    num_workers: 2
+    lr_initial: 0.0001
+    lr_gamma: 0.1
+    lr_milestones: # steps at which lr_initial <- lr_initial * lr_gamma
+      - 750000
+      - 1125000
+      - 1500000
+    warmup_steps: 250000
+    warmup_factor: 0.2
+    max_epochs: 250
+    loss_energy: mae
