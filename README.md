@@ -1,6 +1,10 @@
 # Ewald Message Passing
 
-Reference implementation of the Ewald message passing scheme.
+Reference implementation of the Ewald message passing scheme, proposed in the paper
+
+Ewald-based Long-Range Message Passing for Molecular Graphs  
+by Arthur Kosmala, Johannes Gasteiger, Nicholas Gao, Stephan Günnemann  
+Accepted at ICML 2023
 
 Models for which Ewald message passing is currently implemented:
 
@@ -13,16 +17,16 @@ Currently supported datasets:
  - OC20 [[`arXiv`](https://arxiv.org/abs/2010.09990)] [[`download`](https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md)]
  - OE62 [[`arXiv`](https://arxiv.org/abs/2001.08954)] [[`download`](https://mediatum.ub.tum.de/1507656)]
 
- This repository was forked from the [Open Catalyst 2020 (OC20) Project](https://github.com/Open-Catalyst-Project/ocp), which provides the codebase for training and inference on OC20, as well as on the OE62 dataset which we integrated into the OC20 pipeline.
+This repository was forked from the [Open Catalyst 2020 (OC20) Project](https://github.com/Open-Catalyst-Project/ocp), which provides the codebase for training and inference on OC20, as well as on the OE62 dataset which we integrated into the OC20 pipeline.
 
 
 ## Installation
 
-To setup a `conda` environment with the required dependencies, please follow the [OCP installation instructions](https://github.com/Open-Catalyst-Project/ocp/blob/main/INSTALL.md). They should work identically in this repository. We further recommend installing the `jupyter` package to access our example training and evaluation notebooks, as well as the `seml` package [[`github`](https://github.com/TUM-DAML/seml)] to run and manage (especially longer) experiments from the CLI.
+To setup a `conda` environment with the required dependencies, please follow the [OCP installation instructions](https://github.com/Open-Catalyst-Project/ocp/blob/main/INSTALL.md). They should work identically in this repository. We further recommend installing the `jupyter` package to access our example training and evaluation notebooks, as well as the `seml` package [[`github`](https://github.com/TUM-DAML/seml)] to run and manage (especially longer) experiments from the CLI. To reproduce the long-range binning analyses from the Ewald message passing paper, please install the `simple-dftd3` package [[`installation instructions`](https://dftd3.readthedocs.io/en/latest/installation.html)] including the Python API.
 
-## Download data
+## Data Download and Preprocessing
 
-Dataset download links and instructions for __OC20__ are in [DATASET.md](https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md).
+Dataset download links and instructions for __OC20__ are in [DATASET.md](https://github.com/Open-Catalyst-Project/ocp/blob/main/DATASET.md) in the original OC20 repository.
 
 __To replicate our experiments on OC20__, please consider downloading the following data splits for the _Structure to Energy and Forces_ (S2EF) task:
 - train_2M
@@ -32,7 +36,7 @@ __To replicate our experiments on OC20__, please consider downloading the follow
 - val_ood_both
 - test
 
-__To replicate our experiments on OE62__, no further download is required. We provide LMDB files containing the training, validation and test splits (preprocessed from the raw OE62 data) as part of this repository.
+__To replicate our experiments on OE62__, please download the raw OE62 dataset [[`media server`](https://mediatum.ub.tum.de/1459255?show_id=1507656)]. Afterwards, run the `OE62_dataset_preprocessing.ipynb` notebook to deposit LMDB files containing the training, validation and test splits in a new `oe62` directory.
 
 ## Train and evaluate models from notebook
 
@@ -50,8 +54,26 @@ For example, to train the SchNet model variant with added Ewald message passing 
 ```bash
 seml schnet_oe62_ewald add configs_oe62/schnet_oe62_ewald.yml start
 ```
-Experiments beyond our studied variants can be easily defined by adding or modifying config YAML files. Once an experiment is started, a log file identified by the associated `SLURM jobid` is generated in `logs_oe62` or `logs_oc20`. Among other information, it contains the path to the model checkpoint file, as well as the path to a tensorboard file that may be used to track progress.
+Experiments beyond our studied variants can be easily defined by adding or modifying config YAML files. Once an experiment is started, a log file identified by the associated `SLURM jobid` is generated in `logs_oe62` or `logs_oc20`. Among other information, it contains the path to the model checkpoint file, as well as the path to a tensorboard file that may be used to track progress. `Tensorboard` files can be found in the `logs` directory.
+
+## Contact
+
+Please reach out to [arthur.kosmala@tum.de](mailto:arthur.kosmala@tum.de) if you have any questions.
+
+## Cite
+
+Please cite our paper if you use our method or code in your own works:
+```
+@misc{kosmala2023ewaldbased,
+      title={Ewald-based Long-Range Message Passing for Molecular Graphs}, 
+      author={Arthur Kosmala and Johannes Gasteiger and Nicholas Gao and Stephan Günnemann},
+      year={2023},
+      eprint={2303.04791},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+```
 
 ## License
 
-This project is released under the MIT license.
+This project is released under the Hippocratic License 3.0.
