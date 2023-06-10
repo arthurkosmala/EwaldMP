@@ -76,4 +76,4 @@ Please cite our paper if you use our method or code in your own works:
 
 ## License
 
-This project is released under the Hippocratic License 3.0.
+This project is released under the Hippocratic License 3.0. This concerns only the files added to the OC20 repository, which was itself released under the MIT license. 
