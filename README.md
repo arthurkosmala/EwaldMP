@@ -4,7 +4,12 @@ Reference implementation of the Ewald message passing scheme, proposed in the pa
 
 Ewald-based Long-Range Message Passing for Molecular Graphs  
 by Arthur Kosmala, Johannes Gasteiger, Nicholas Gao, Stephan Günnemann  
-Accepted at ICML 2023
+Accepted at ICML 2023   
+
+  
+<p align="left">
+<img src="https://www.cs.cit.tum.de/fileadmin/_processed_/0/1/csm_main_figure_draft_v3__3__bd9429d3bd.png" width="644">
+</p>
 
 Models for which Ewald message passing is currently implemented:
 
@@ -64,13 +69,11 @@ Please reach out to [arthur.kosmala@tum.de](mailto:arthur.kosmala@tum.de) if you
 
 Please cite our paper if you use our method or code in your own works:
 ```
-@misc{kosmala2023ewaldbased,
-      title={Ewald-based Long-Range Message Passing for Molecular Graphs}, 
-      author={Arthur Kosmala and Johannes Gasteiger and Nicholas Gao and Stephan Günnemann},
-      year={2023},
-      eprint={2303.04791},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
+@inproceedings{kosmala_ewaldbased_2023,
+  title = {Ewald-based Long-Range Message Passing for Molecular Graphs},
+  author = {Kosmala, Arthur and Gasteiger, Johannes and Gao, Nicholas and G{\"u}nnemann, Stephan},
+  booktitle={International Conference on Machine Learning (ICML)},
+  year = {2023} 
 }
 ```
 
