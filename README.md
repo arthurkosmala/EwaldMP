@@ -7,7 +7,7 @@ by Arthur Kosmala, Johannes Gasteiger, Nicholas Gao, Stephan Günnemann
 Accepted at ICML 2023   
 
   
-![Ewald Concept Figure](https://github.com/arthurkosmala/EwaldMP/blob/main/ewald_concept_fig.png "Ewald Concept Figure")
+![Ewald Concept Figure](https://www.cs.cit.tum.de/fileadmin/w00cfj/daml/_my_direct_uploads/ewald_concept_fig.png)
 
 Models for which Ewald message passing is currently implemented:
 
